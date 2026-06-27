@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JR Romero — Open House Offers | T3 Live</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:      #111110;
+    --ink2:     #44443f;
+    --ink3:     #888780;
+    --rule:     #e0dfd8;
+    --surface:  #f7f6f2;
+    --white:    #ffffff;
+    --gold:     #b8860b;
+    --gold-bg:  #fdf6e3;
+    --gold-bdr: #e8d48a;
+    --green:    #1a7f4b;
+    --green-bg: #e8f7ef;
+    --font-d:   'Barlow Condensed', sans-serif;
+    --font-b:   'Inter', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-b);
+    background: var(--surface);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: var(--ink);
+    color: #fff;
+    text-align: center;
+    padding: 2.25rem 1.25rem 1.75rem;
+  }
+  .hero-eye {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 0.5rem;
+  }
+  .hero h1 {
+    font-family: var(--font-d);
+    font-size: clamp(1.9rem, 6vw, 3rem);
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 0.6rem;
+  }
+  .hero h1 em { font-style: normal; color: #f0c040; }
+  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.55); margin-bottom: 1rem; }
+  .expire {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(240,192,64,0.15);
+    border: 1px solid rgba(240,192,64,0.3);
+    color: #f0c040;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 100px;
+  }
+
+  /* ── TABLE WRAP ── */
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.75rem 1rem 3rem;
+  }
+
+  /* Scroll hint on mobile */
+  .scroll-hint {
+    display: none;
+    font-size: 12px;
+    color: var(--ink3);
+    text-align: center;
+    margin-bottom: 0.75rem;
+  }
+  @media (max-width: 600px) { .scroll-hint { display: block; } }
+
+  .tbl-outer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 14px;
+    border: 1px solid var(--rule);
+    background: var(--white);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+
+  table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+  }
+
+  /* ── COLUMN HEADERS ── */
+  thead tr.col-heads th {
+    padding: 0;
+    vertical-align: bottom;
+  }
+  .th-inner {
+    padding: 1.1rem 1.1rem 0.9rem;
+    border-left: 1px solid var(--rule);
+  }
+  thead tr.col-heads th:first-child .th-inner { border-left: none; }
+
+  .plan-label {
+    font-family: var(--font-d);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  .plan-duration {
+    font-size: 11px;
+    color: var(--ink3);
+    margin-bottom: 8px;
+  }
+  .plan-price-now {
+    font-family: var(--font-d);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .plan-price-was {
+    font-size: 12px;
+    color: var(--ink3);
+    text-decoration: line-through;
+  }
+  .plan-save {
+    display: inline-block;
+    background: var(--green-bg);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-top: 4px;
+    margin-bottom: 0.65rem;
+  }
+
+  /* Best value column */
+  thead tr.best-banner th.col-best {
+    background: var(--ink);
+    border-radius: 14px 14px 0 0;
+  }
+  .best-banner-inner {
+    padding: 6px 8px;
+    text-align: center;
+    font-family: var(--font-d);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #f0c040;
+  }
+  thead tr.best-banner th.col-blank { background: transparent; border: none; }
+
+  .col-best .th-inner {
+    background: #fafaf8;
+    border-left-color: #d0cfc8;
+  }
+  td.col-best { background: #fafaf8; border-left: 1px solid #d0cfc8; }
+
+  /* ── SECTION ROWS ── */
+  tr.section-head td {
+    background: var(--surface);
+    padding: 7px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    border-top: 1px solid var(--rule);
+  }
+  tr.section-head td.col-best { background: #f2f1ec; }
+
+  /* ── DATA ROWS ── */
+  tr.data-row td {
+    padding: 10px 12px;
+    vertical-align: top;
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.45;
+  }
+  tr.data-row td:first-child {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+    width: 34%;
+    min-width: 140px;
+  }
+  tr.data-row td + td {
+    border-left: 1px solid var(--rule);
+    text-align: center;
+    width: 22%;
+  }
+
+  /* Check / dash / value cells */
+  .chk {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--green-bg);
+    line-height: 20px;
+    font-size: 12px;
+    color: var(--green);
+  }
+  .dash {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f0efeb;
+    line-height: 20px;
+    font-size: 14px;
+    color: #ccc;
+  }
+  .val {
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .val-sub {
+    font-size: 11px;
+    color: var(--ink3);
+    font-weight: 400;
+    display: block;
+    margin-top: 1px;
+  }
+  .new-tag {
+    display: inline-block;
+    background: var(--gold-bg);
+    border: 1px solid var(--gold-bdr);
+    color: var(--gold);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* ── CTA ROW ── */
+  tr.cta-row td {
+    padding: 1rem 1.1rem 1.25rem;
+    border-top: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  tr.cta-row td + td { border-left: 1px solid var(--rule); }
+  tr.cta-row td:first-child { vertical-align: middle; }
+  .cta-aside {
+    font-size: 12px;
+    color: var(--ink3);
+    line-height: 1.5;
+  }
+  .cta-btn {
+    display: block;
+    width: 100%;
+    padding: 11px 8px;
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--font-d);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: opacity 0.15s;
+  }
+  .cta-btn:hover { opacity: 0.82; }
+  .cta-btn.gold { background: var(--gold); }
+  .cta-note {
+    font-size: 10px;
+    color: var(--ink3);
+    text-align: center;
+    margin-top: 5px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem 3rem;
+  }
+  .disc {
+    border-top: 1px solid var(--rule);
+    padding-top: 1.25rem;
+    font-size: 11px;
+    color: var(--ink3);
+    line-height: 1.6;
+  }
+  .disc p + p { margin-top: 0.65rem; }
+  .flinks {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    font-size: 12px;
+  }
+  .flinks a { color: var(--ink2); text-decoration: none; }
+  .flinks a:hover { text-decoration: underline; }
+  .fcopy { margin-top: 0.4rem; font-size: 11px; color: var(--ink3); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <p class="hero-eye">T3 Live Open House — JR Romero</p>
+  <h1>Save Up to <em>$5,788</em><br>on Pro Trading Access</h1>
+  <p class="hero-sub">Momentum Express VTF® with pro trader JR Romero — live room, alerts, and courses</p>
+  <span class="expire">
+    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Offer expires June 26 at 11:59 pm ET
+  </span>
+</header>
+
+<div class="wrap">
+  <p class="scroll-hint">← Scroll to compare all three offers →</p>
+
+  <div class="tbl-outer">
+  <table>
+    <thead>
+      <!-- Best value banner row -->
+      <tr class="best-banner">
+        <th class="col-blank"></th>
+        <th class="col-blank"></th>
+        <th class="col-blank"></th>
+        <th class="col-best"><div class="best-banner-inner">★ Best Value</div></th>
+      </tr>
+      <!-- Column headers -->
+      <tr class="col-heads">
+        <th><div class="th-inner" style="border-left:none;"></div></th>
+        <th>
+          <div class="th-inner">
+            <div class="plan-label">6 Months</div>
+            <div class="plan-duration">Momentum Express VTF®</div>
+            <div class="plan-price-now">$1,699</div>
+            <div class="plan-price-was">Regular $2,999</div>
+            <div class="plan-save">Save $1,300</div>
+          </div>
+        </th>
+        <th>
+          <div class="th-inner">
+            <div class="plan-label">1 Year</div>
+            <div class="plan-duration">VTF® + Sultans + 2 Courses</div>
+            <div class="plan-price-now">$2,999</div>
+            <div class="plan-price-was">Regular $5,198</div>
+            <div class="plan-save">Save $2,199</div>
+          </div>
+        </th>
+        <th class="col-best">
+          <div class="th-inner">
+            <div class="plan-label">2 Years</div>
+            <div class="plan-duration">VTF® + Sultans + 4 Courses</div>
+            <div class="plan-price-now">$4,499</div>
+            <div class="plan-price-was">Regular $10,287</div>
+            <div class="plan-save">Save $5,788</div>
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <!-- TOP CTA ROW -->
+      <tr class="cta-row">
+        <td>
+          <p class="cta-aside">Secure checkout.<br>All access delivered digitally.</p>
+        </td>
+        <td>
+          <a class="cta-btn" href="https://vp301.infusionsoft.com/app/orderForms/Momentum-Express-OH-JUN-6M" target="_blank">Purchase →</a>
+          <p class="cta-note">6-Month Plan</p>
+        </td>
+        <td>
+          <a class="cta-btn" href="https://vp301.infusionsoft.com/app/orderForms/Momentum-Express-OH-JUN-1YR" target="_blank">Purchase →</a>
+          <p class="cta-note">1-Year Plan</p>
+        </td>
+        <td class="col-best">
+          <a class="cta-btn gold" href="https://vp301.infusionsoft.com/app/orderForms/Momentum-Express-OH-JUN-2YR" target="_blank">Purchase →</a>
+          <p class="cta-note">2-Year Best Value Plan</p>
+        </td>
+      </tr>
+
+      <!-- SECTION: Live Room -->
+      <tr class="section-head">
+        <td colspan="4">Live Trading Room — Momentum Express VTF®</td>
+      </tr>
+      <tr class="data-row">
+        <td>VTF® Access Duration</td>
+        <td><span class="val">6 months</span></td>
+        <td><span class="val">12 months</span></td>
+        <td class="col-best"><span class="val">24 months</span></td>
+      </tr>
+      <tr class="data-row">
+        <td>Daily live room with JR &amp; team</td>
+        <td><span class="chk">✓</span></td>
+        <td><span class="chk">✓</span></td>
+        <td class="col-best"><span class="chk">✓</span></td>
+      </tr>
+      <tr class="data-row">
+        <td>Live trade alerts — audio &amp; video</td>
+        <td><span class="chk">✓</span></td>
+        <td><span class="chk">✓</span></td>
+        <td class="col-best"><span class="chk">✓</span></td>
+      </tr>
+      <tr class="data-row">
+        <td>Proprietary news servers</td>
+        <td><span class="chk">✓</span></td>
+        <td><span class="chk">✓</span></td>
+        <td class="col-best"><span class="chk">✓</span></td>
+      </tr>
+      <tr class="data-row">
+        <td>Post Market Wrap-Up (Mon–Thu)</td>
+        <td><span class="chk">✓</span></td>
+        <td><span class="chk">✓</span></td>
+        <td class="col-best"><span class="chk">✓</span></td>
+      </tr>
+      <tr class="data-row">
+        <td>Sunday Watchlist session</td>
+        <td><span class="chk">✓</span></td>
+        <td><span class="chk">✓</span></td>
+        <td class="col-best"><span class="chk">✓</span></td>
+      </tr>
+      <tr class="data-row">
+        <td>Mobile app access</td>
+        <td><span class="chk">✓</span></td>
+        <td><span class="chk">✓</span></td>
+        <td class="col-best"><span class="chk">✓</span></td>
+      </tr>
+
+      <!-- SECTION: Swing Trading Add-on -->
+      <tr class="section-head">
+        <td colspan="4">Swing Trading Add-on</td>
+      </tr>
+      <tr class="data-row">
+        <td>Sultans of Swing Trading VTF®<br><span style="font-size:11px;color:var(--ink3);font-weight:400">JR + TDV + TG — real-time alerts, weekly broadcasts, Sunday Watchlist</span></td>
+        <td><span class="dash">–</span></td>
+        <td><span class="val">3 months <span class="new-tag">NEW</span><span class="val-sub">$499 value</span></span></td>
+        <td class="col-best"><span class="val">3 months <span class="new-tag">NEW</span><span class="val-sub">$499 value</span></span></td>
+      </tr>
+
+      <!-- SECTION: Fundamental Tool -->
+      <tr class="section-head">
+        <td colspan="4">Fundamental Analysis Tool</td>
+      </tr>
+      <tr class="data-row">
+        <td>Koyfin access<br><span style="font-size:11px;color:var(--ink3);font-weight:400">JR's favorite tool for screening &amp; swing trade evaluation</span></td>
+        <td><span class="val">3 months</span></td>
+        <td><span class="val">3 months</span></td>
+        <td class="col-best"><span class="val">3 months</span></td>
+      </tr>
+
+      <!-- SECTION: Courses -->
+      <tr class="section-head">
+        <td colspan="4">Home Study Courses</td>
+      </tr>
+      <tr class="data-row">
+        <td>Momentum Mastery<br><span style="font-size:11px;color:var(--ink3);font-weight:400">15+ hrs — charts, price action, market structure</span></td>
+        <td><span class="val">Included<span class="val-sub">$795 value</span></span></td>
+        <td><span class="val">Included<span class="val-sub">$795 value</span></span></td>
+        <td class="col-best"><span class="val">Included<span class="val-sub">$795 value</span></span></td>
+      </tr>
+      <tr class="data-row">
+        <td>2-Minute Reversals<br><span style="font-size:11px;color:var(--ink3);font-weight:400">116-page guide + 6 reversal strategies incl. "Evil Knievel"</span></td>
+        <td><span class="dash">–</span></td>
+        <td><span class="val">Included <span class="new-tag">NEW</span><span class="val-sub">$295 value</span></span></td>
+        <td class="col-best"><span class="val">Included <span class="new-tag">NEW</span><span class="val-sub">$295 value</span></span></td>
+      </tr>
+      <tr class="data-row">
+        <td>High Probability Scalping<br><span style="font-size:11px;color:var(--ink3);font-weight:400">13-hr course — momentum scalping and exit strategy</span></td>
+        <td><span class="dash">–</span></td>
+        <td><span class="dash">–</span></td>
+        <td class="col-best"><span class="val">Included <span class="new-tag">NEW</span><span class="val-sub">$795 value</span></span></td>
+      </tr>
+      <tr class="data-row">
+        <td>Professional Tape Reading<br><span style="font-size:11px;color:var(--ink3);font-weight:400">Next-gen tape reading system — top 1% of trade setups</span></td>
+        <td><span class="dash">–</span></td>
+        <td><span class="dash">–</span></td>
+        <td class="col-best"><span class="val">Included <span class="new-tag">NEW</span><span class="val-sub">$795 value</span></span></td>
+      </tr>
+
+      <!-- SECTION: Total Value -->
+      <tr class="section-head">
+        <td colspan="4">Summary</td>
+      </tr>
+      <tr class="data-row">
+        <td style="font-weight:600">Total courses included</td>
+        <td><span class="val">1</span></td>
+        <td><span class="val">2</span></td>
+        <td class="col-best"><span class="val" style="font-size:1.1rem">4</span></td>
+      </tr>
+      <tr class="data-row">
+        <td style="font-weight:600">Total retail value</td>
+        <td><span class="val">~$3,794</span></td>
+        <td><span class="val">~$6,588</span></td>
+        <td class="col-best"><span class="val" style="font-size:1.1rem">~$10,287</span></td>
+      </tr>
+      <tr class="data-row">
+        <td style="font-weight:600">Your price</td>
+        <td><span class="val" style="font-size:1.15rem">$1,699</span></td>
+        <td><span class="val" style="font-size:1.15rem">$2,999</span></td>
+        <td class="col-best"><span class="val" style="font-size:1.3rem;color:var(--gold)">$4,499</span></td>
+      </tr>
+      <tr class="data-row">
+        <td style="font-weight:600">You save</td>
+        <td><span class="val" style="color:var(--green);font-size:1.1rem;font-weight:600">$1,300</span></td>
+        <td><span class="val" style="color:var(--green);font-size:1.1rem;font-weight:600">$2,199</span></td>
+        <td class="col-best"><span class="val" style="color:var(--green);font-size:1.25rem;font-weight:600">$5,788</span></td>
+      </tr>
+
+      <!-- CTA ROW -->
+      <tr class="cta-row">
+        <td>
+          <p class="cta-aside">Secure checkout.<br>All access delivered digitally.</p>
+        </td>
+        <td>
+          <a class="cta-btn" href="https://vp301.infusionsoft.com/app/orderForms/Momentum-Express-OH-JUN-6M" target="_blank">Purchase →</a>
+          <p class="cta-note">6-Month Plan</p>
+        </td>
+        <td>
+          <a class="cta-btn" href="https://vp301.infusionsoft.com/app/orderForms/Momentum-Express-OH-JUN-1YR" target="_blank">Purchase →</a>
+          <p class="cta-note">1-Year Plan</p>
+        </td>
+        <td class="col-best">
+          <a class="cta-btn gold" href="https://vp301.infusionsoft.com/app/orderForms/Momentum-Express-OH-JUN-2YR" target="_blank">Purchase →</a>
+          <p class="cta-note">2-Year Best Value Plan</p>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="disc">
+    <p><strong>Disclaimer:</strong> Customer feedback is reported by customers and not independently verified. Results described are not typical. There is no guarantee you will make money or recoup your investment. Trading financial markets involves extreme risk. Evaluate your personal risk profile before any investment decision.</p>
+    <p>T3 Live, LLC is a financial publisher and is not a Broker-Dealer, Investment Adviser, or entity subject to SEC, CFTC, or FINRA regulation. Programs are for informational and educational purposes only and do not constitute personalized investment advice.</p>
+    <p>T3 Trading Group, LLC is a Registered SEC Broker-Dealer and Member of FINRA/SIPC. Visit <a href="https://www.T3Trading.com" target="_blank">T3Trading.com</a> for more information.</p>
+    <div class="flinks">
+      <a href="https://www.t3live.com/privacy-policy/" target="_blank">Privacy Policy</a>
+      <a href="https://www.t3live.com/terms-of-use/" target="_blank">Terms of Use</a>
+      <a href="mailto:info@t3live.com">info@t3live.com</a>
+      <a href="tel:18889983548">1.888.998.3548</a>
+    </div>
+    <p class="fcopy">T3 Live LLC · 88 Pine Street, 23rd Floor, New York, NY 10005 · © 2025 T3 Live LLC. All Rights Reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
