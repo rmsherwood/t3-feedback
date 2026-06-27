@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentum Express VTF® — T3 Live</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg0:#f0f2f5; --bg1:#ffffff; --bg2:#eef0f3; --bg3:#e3e5e8; --bg4:#f8f9fa;
+  --line:#e0e2e6; --text1:#060607; --text2:#4e5058; --text3:#81838a;
+  --accent:#1d6de5; --accent2:#1558c0;
+  --green:#1a7f4b; --green-bg:#e6f4ed;
+  --red:#da373c; --locked:#9ea1a9;
+  --font:'Inter',sans-serif; --shadow:0 1px 3px rgba(0,0,0,0.08);
+}
+[data-theme="dark"] {
+  --bg0:#1a1c1f; --bg1:#222428; --bg2:#2a2d32; --bg3:#313438; --bg4:#1e2124;
+  --line:#38393d; --text1:#e8e9ea; --text2:#a0a3a8; --text3:#6b6f75;
+  --accent:#3b82f6; --accent2:#1d4ed8;
+  --green:#22c55e; --green-bg:#14532d44;
+  --red:#ef4444; --locked:#4b5563;
+  --shadow:0 1px 3px rgba(0,0,0,0.3);
+}
+
+html,body { height:100%; font-family:var(--font); background:var(--bg0); color:var(--text1); overflow:hidden; }
+.app { display:flex; height:100vh; width:100vw; }
+
+/* ── SIDEBAR ── */
+.sidebar { width:240px; min-width:240px; background:var(--bg1); display:flex; flex-direction:column; border-right:1px solid var(--line); overflow:hidden; }
+
+.server-header { padding:0 12px; height:56px; display:flex; align-items:center; gap:9px; border-bottom:1px solid var(--line); flex-shrink:0; }
+.server-logo { width:34px; height:34px; border-radius:6px; overflow:hidden; flex-shrink:0; }
+.server-logo img { width:100%; height:100%; object-fit:cover; display:block; }
+.server-titles { flex:1; overflow:hidden; }
+.server-name { font-size:13px; font-weight:700; color:var(--text1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
+.server-sub { font-size:10px; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+
+.channels-scroll { flex:1; overflow-y:auto; padding:8px 0 4px; }
+.channels-scroll::-webkit-scrollbar { width:4px; }
+.channels-scroll::-webkit-scrollbar-thumb { background:var(--bg3); border-radius:4px; }
+
+.ch-group { margin-bottom:2px; }
+.ch-group-header { display:flex; align-items:center; gap:4px; padding:5px 8px 5px 10px; cursor:pointer; user-select:none; color:var(--text3); font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; border-radius:4px; margin:0 4px; transition:color 0.1s,background 0.1s; }
+.ch-group-header:hover { color:var(--text1); background:var(--bg2); }
+.ch-group-arrow { font-size:9px; transition:transform 0.15s; display:inline-block; }
+.ch-group-header.open .ch-group-arrow { transform:rotate(90deg); }
+.ch-group-body.collapsed { display:none; }
+
+.ch-item { display:flex; align-items:center; gap:6px; padding:4px 8px 4px 16px; border-radius:4px; margin:1px 6px; cursor:pointer; color:var(--text2); font-size:13.5px; min-height:30px; transition:background 0.1s,color 0.1s; position:relative; }
+.ch-item:hover { background:var(--bg2); color:var(--text1); }
+.ch-item.active { background:var(--bg3); color:var(--text1); }
+.ch-item.active::before { content:''; position:absolute; left:-6px; top:50%; transform:translateY(-50%); width:3px; height:16px; background:var(--accent); border-radius:0 3px 3px 0; }
+.ch-item.child { padding-left:28px; font-size:13px; }
+.ch-icon { font-size:13px; flex-shrink:0; color:var(--text3); }
+.ch-item.active .ch-icon, .ch-item:hover .ch-icon { color:var(--text2); }
+.ch-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.ch-badge { background:var(--red); color:#fff; font-size:10px; font-weight:700; padding:1px 5px; border-radius:10px; min-width:18px; text-align:center; }
+.ch-live-pill { display:flex; align-items:center; gap:3px; background:#14532d; color:#4ade80; font-size:9px; font-weight:700; letter-spacing:0.05em; padding:2px 6px; border-radius:100px; flex-shrink:0; }
+.ch-live-dot { width:5px; height:5px; border-radius:50%; background:#4ade80; animation:pulse 1.8s ease-in-out infinite; }
+[data-theme="light"] .ch-live-pill { background:#dcfce7; color:#15803d; }
+[data-theme="light"] .ch-live-dot { background:#16a34a; }
+
+.ch-item.locked { color:var(--locked); opacity:0.8; }
+.ch-item.locked:hover { background:var(--bg2); color:var(--text2); opacity:1; }
+.lock-icon { flex-shrink:0; opacity:0.6; }
+.upgrade-pill { font-size:9px; font-weight:700; letter-spacing:0.04em; background:rgba(180,83,9,0.12); color:#b45309; border:1px solid rgba(180,83,9,0.25); padding:1px 5px; border-radius:4px; white-space:nowrap; }
+[data-theme="dark"] .upgrade-pill { background:rgba(245,158,11,0.15); color:#f59e0b; border-color:rgba(245,158,11,0.3); }
+
+/* ── DM ITEM ── */
+.dm-item {
+  display:flex; align-items:center; gap:8px;
+  padding:4px 8px 4px 16px;
+  border-radius:4px; margin:1px 6px;
+  cursor:pointer; min-height:36px;
+  transition:background 0.1s,color 0.1s;
+  position:relative;
+}
+.dm-item:hover { background:var(--bg2); }
+.dm-avatar-wrap { position:relative; flex-shrink:0; }
+.dm-avatar {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; flex-shrink:0;
+}
+.dm-status {
+  position:absolute; bottom:-1px; right:-1px;
+  width:9px; height:9px; border-radius:50%;
+  background:#22c55e; border:2px solid var(--bg1);
+}
+.dm-info { flex:1; overflow:hidden; }
+.dm-name { font-size:13px; font-weight:500; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px; }
+.dm-item:hover .dm-name { color:var(--text1); }
+.dm-tag { font-size:9px; font-weight:700; letter-spacing:0.04em; background:rgba(29,109,229,0.1); color:var(--accent); border:1px solid rgba(29,109,229,0.2); padding:1px 5px; border-radius:4px; white-space:nowrap; }
+[data-theme="dark"] .dm-tag { background:rgba(59,130,246,0.15); color:#93c5fd; border-color:rgba(59,130,246,0.25); }
+.dm-preview { font-size:11px; color:var(--text3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* ── USER BAR ── */
+.user-bar { background:var(--bg4); border-top:1px solid var(--line); flex-shrink:0; }
+
+/* Open House Banner — hardcoded dark blue, never inherits theme */
+.open-house-banner {
+  display:block; text-decoration:none;
+  background:#0f2557;
+  padding:10px 12px 11px;
+  border-bottom:1px solid #0a1b3f;
+  transition:filter 0.15s;
+}
+.open-house-banner:hover { filter:brightness(1.08); }
+.oh-eyebrow { font-size:9px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:3px; }
+.oh-headline { font-size:13px; font-weight:700; color:#fff; margin-bottom:7px; line-height:1.3; }
+.oh-headline em { font-style:normal; color:#fbbf24; }
+.oh-timer { display:flex; align-items:stretch; gap:5px; margin-bottom:8px; }
+.oh-unit { background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:4px 0; text-align:center; flex:1; }
+.oh-num { font-size:16px; font-weight:700; color:#fff; line-height:1; display:block; font-variant-numeric:tabular-nums; }
+.oh-lbl { font-size:8px; color:rgba(255,255,255,0.45); letter-spacing:0.07em; text-transform:uppercase; }
+.oh-sep { color:rgba(255,255,255,0.3); font-size:16px; font-weight:700; display:flex; align-items:center; padding-bottom:4px; }
+.oh-cta { display:block; background:#f59e0b; color:#fff; font-size:11px; font-weight:800; letter-spacing:0.06em; text-align:center; padding:6px 8px; border-radius:6px; text-transform:uppercase; }
+
+.contact-banner { padding:7px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; gap:6px; }
+.contact-banner-text { font-size:10.5px; color:var(--text2); line-height:1.45; }
+.contact-banner-text a { color:var(--accent); text-decoration:none; }
+.contact-banner-text a:hover { text-decoration:underline; }
+.contact-banner-text strong { color:var(--text1); font-weight:500; }
+
+.user-identity { display:flex; align-items:center; gap:8px; padding:8px 8px 8px 10px; }
+.user-avatar { width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0; position:relative; }
+.user-status-dot { position:absolute; bottom:-1px; right:-1px; width:10px; height:10px; border-radius:50%; background:#22c55e; border:2px solid var(--bg4); }
+.user-names { flex:1; overflow:hidden; }
+.user-display { font-size:13px; font-weight:600; color:var(--text1); }
+.user-handle { font-size:11px; color:var(--text3); }
+.icon-btn { width:28px; height:28px; border-radius:4px; border:none; background:transparent; color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; transition:background 0.1s,color 0.1s; }
+.icon-btn:hover { background:var(--bg3); color:var(--text1); }
+
+/* ── MAIN ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg0); }
+
+.topbar { height:48px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px; padding:0 14px 0 16px; flex-shrink:0; background:var(--bg1); box-shadow:var(--shadow); }
+.topbar-hash { font-size:17px; color:var(--text3); }
+.topbar-name { font-size:15px; font-weight:600; color:var(--text1); }
+.topbar-divider { width:1px; height:18px; background:var(--line); margin:0 2px; }
+.topbar-desc { font-size:13px; color:var(--text3); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.topbar-live { display:flex; align-items:center; gap:5px; background:var(--green-bg); border:1px solid rgba(34,197,94,0.3); color:var(--green); font-size:11px; font-weight:600; padding:3px 9px; border-radius:100px; }
+.live-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 1.8s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+/* Theme toggle — pill switch */
+.theme-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px 4px 6px;
+  border-radius: 100px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.theme-toggle:hover { background: var(--bg3); }
+.toggle-track {
+  width: 28px; height: 16px; border-radius: 100px;
+  background: var(--line); position: relative;
+  transition: background 0.2s; flex-shrink: 0;
+}
+[data-theme="dark"] .toggle-track { background: var(--accent); }
+.toggle-thumb {
+  position: absolute; top: 2px; left: 2px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #fff; transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .toggle-thumb { transform: translateX(12px); }
+.toggle-label { font-size: 11px; font-weight: 500; color: var(--text2); white-space: nowrap; }
+
+/* Refresh button */
+.refresh-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 6px;
+  border: 1px solid rgba(220,38,38,0.3);
+  background: rgba(220,38,38,0.07);
+  color: #b91c1c; font-size: 11px; font-weight: 600;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.refresh-btn:hover { background: rgba(220,38,38,0.13); border-color: rgba(220,38,38,0.5); }
+[data-theme="dark"] .refresh-btn { color: #fca5a5; border-color: rgba(252,165,165,0.25); background: rgba(239,68,68,0.08); }
+[data-theme="dark"] .refresh-btn:hover { background: rgba(239,68,68,0.15); }
+.refresh-spin { display: inline-block; font-size: 13px; line-height: 1; }
+.refresh-btn:active .refresh-spin { animation: spin-once 0.4s linear; }
+@keyframes spin-once { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* Chat pane layout — pinned outside scroll */
+.chat-pane { width:300px; min-width:260px; display:flex; flex-direction:column; background:var(--bg1); overflow:hidden; }
+.chat-pinned-area { flex-shrink:0; padding: 8px 0 0; }
+
+.content { flex:1; display:flex; overflow:hidden; }
+
+/* ── VIDEO ── */
+.video-pane { flex:1; display:flex; flex-direction:column; overflow:hidden; border-right:1px solid var(--line); }
+.video-stage { flex:1; background:#131722; overflow:hidden; position:relative; }
+.tv-bg { position:absolute; inset:0; background-color:#131722; background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px); background-size:48px 36px; }
+.chart-svg { position:absolute; inset:0; width:100%; height:100%; }
+
+/* Trader cam */
+.trader-cam { position:absolute; bottom:14px; left:14px; width:90px; height:90px; border-radius:10px; overflow:hidden; border:2px solid rgba(255,255,255,0.18); box-shadow:0 4px 16px rgba(0,0,0,0.6); z-index:10; }
+.trader-speaking-ring { position:absolute; inset:0; border-radius:9px; border:2.5px solid #22c55e; animation:speaking-ring 1.5s ease-in-out infinite; pointer-events:none; }
+@keyframes speaking-ring { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+.presenter-badge { position:absolute; bottom:18px; left:114px; background:rgba(0,0,0,0.62); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:5px 10px; z-index:10; }
+.presenter-name { font-size:12px; font-weight:600; color:#fff; }
+.presenter-role { font-size:10px; color:rgba(255,255,255,0.5); }
+
+.speaking-ring { position:absolute; bottom:12px; right:14px; display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.55); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:5px 10px; font-size:11px; color:#22c55e; font-weight:500; z-index:10; }
+
+.alerts-strip { background:var(--bg1); border-top:1px solid var(--line); padding:7px 14px; display:flex; align-items:center; gap:10px; min-height:36px; flex-shrink:0; }
+.alerts-label { font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#b45309; flex-shrink:0; display:flex; align-items:center; gap:5px; }
+[data-theme="dark"] .alerts-label { color:#f59e0b; }
+.alerts-label::before { content:''; width:7px; height:7px; border-radius:50%; background:currentColor; display:inline-block; }
+.alerts-ticker { flex:1; overflow:hidden; white-space:nowrap; font-size:12px; color:var(--text2); mask-image:linear-gradient(90deg,transparent,black 5%,black 95%,transparent); }
+.alerts-ticker span { animation:scroll-left 32s linear infinite; display:inline-block; }
+@keyframes scroll-left { 0%{transform:translateX(60%)} 100%{transform:translateX(-100%)} }
+.alert-item { margin-right: 60px; font-size: 12px; color: var(--text2); white-space: nowrap; }
+.alert-item b { color: var(--text1); font-weight: 600; }
+
+/* ── CHAT ── */
+.chat-pane { width:300px; min-width:260px; display:flex; flex-direction:column; background:var(--bg1); }
+.chat-pane-header { height:48px; border-bottom:1px solid var(--line); display:flex; align-items:center; padding:0 12px; gap:6px; flex-shrink:0; }
+.chat-pane-title { font-size:13px; font-weight:600; color:var(--text1); flex:1; }
+.member-count { font-size:11px; color:var(--text3); display:flex; align-items:center; gap:4px; }
+.member-dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
+.messages { flex:1; overflow-y:auto; padding:12px 0; }
+.messages::-webkit-scrollbar { width:4px; }
+.messages::-webkit-scrollbar-thumb { background:var(--bg3); border-radius:4px; }
+.date-divider { display:flex; align-items:center; gap:8px; padding:4px 12px 8px; }
+.date-divider::before,.date-divider::after { content:''; flex:1; height:1px; background:var(--line); }
+.date-divider span { font-size:11px; color:var(--text3); white-space:nowrap; }
+.msg { display:flex; gap:9px; padding:3px 12px; position:relative; }
+.msg:hover { background:var(--bg2); }
+.msg-avatar { width:32px; height:32px; border-radius:50%; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; }
+.msg-avatar.mod   { background:linear-gradient(135deg,#1d4ed8,#3b82f6); }
+.msg-avatar.user1 { background:linear-gradient(135deg,#7c3aed,#a855f7); }
+.msg-avatar.user2 { background:linear-gradient(135deg,#059669,#34d399); }
+.msg-avatar.user3 { background:linear-gradient(135deg,#dc2626,#f87171); }
+.msg-avatar.user4 { background:linear-gradient(135deg,#d97706,#fbbf24); }
+.msg-body { flex:1; min-width:0; }
+.msg-meta { display:flex; align-items:baseline; gap:7px; margin-bottom:2px; }
+.msg-author { font-size:13px; font-weight:600; color:var(--text1); }
+.msg-author.mod-tag::after { content:'MOD'; font-size:9px; font-weight:700; background:rgba(29,109,229,0.12); color:var(--accent); padding:1px 4px; border-radius:3px; margin-left:5px; vertical-align:middle; }
+.msg-time { font-size:11px; color:var(--text3); }
+.msg-text { font-size:13px; color:var(--text2); line-height:1.5; word-break:break-word; }
+.msg-text a { color:var(--accent); text-decoration:none; }
+.ticker { color:#1d4ed8; font-weight:600; }
+[data-theme="dark"] .ticker { color:#60a5fa; }
+.mention { color:#1d4ed8; font-weight:600; background:rgba(29,109,229,0.1); border-radius:3px; padding:0 3px; }
+[data-theme="dark"] .mention { color:#93c5fd; background:rgba(147,197,253,0.12); }
+.crown-badge::before { content:'👑'; font-size:11px; margin-right:3px; vertical-align:middle; }
+.pro-tag { font-size:9px; font-weight:700; background:rgba(217,119,6,0.12); color:#b45309; border:1px solid rgba(217,119,6,0.25); padding:1px 4px; border-radius:3px; margin-left:4px; vertical-align:middle; }
+[data-theme="dark"] .pro-tag { background:rgba(251,191,36,0.12); color:#fbbf24; border-color:rgba(251,191,36,0.25); }
+.msg.cont { padding-top:1px; }
+.msg.cont .msg-avatar { visibility:hidden; }
+.msg.cont .msg-meta { display:none; }
+
+/* ── PINNED MESSAGE ── */
+.pinned-wrap {
+  margin: 0 10px 4px;
+  border-radius: 8px;
+  border: 1px solid rgba(29,109,229,0.25);
+  background: rgba(29,109,229,0.06);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .pinned-wrap {
+  border-color: rgba(99,152,246,0.22);
+  background: rgba(59,130,246,0.08);
+}
+.pinned-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 10px;
+  background: rgba(29,109,229,0.1);
+  border-bottom: 1px solid rgba(29,109,229,0.15);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--accent);
+}
+[data-theme="dark"] .pinned-bar { background: rgba(59,130,246,0.12); border-color: rgba(99,152,246,0.18); }
+.pin-icon { font-size: 11px; }
+.pinned-body { padding: 8px 10px 10px; }
+.pinned-meta { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.pinned-avatar {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg,#1d4ed8,#3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.pinned-author { font-size: 12px; font-weight: 700; color: var(--text1); }
+.pinned-author-tag { font-size: 9px; font-weight: 700; background: rgba(29,109,229,0.12); color: var(--accent); border: 1px solid rgba(29,109,229,0.2); padding: 1px 4px; border-radius: 3px; margin-left: 3px; vertical-align: middle; }
+.pinned-time { font-size: 10px; color: var(--text3); margin-left: auto; }
+.pinned-label { font-size: 10px; font-weight: 600; color: var(--text2); margin-bottom: 5px; letter-spacing: 0.01em; }
+.watchlist-tickers { display: flex; flex-wrap: wrap; gap: 5px; }
+.wl-ticker {
+  font-size: 12px; font-weight: 700;
+  color: #1d4ed8; background: rgba(29,109,229,0.1);
+  border: 1px solid rgba(29,109,229,0.2);
+  padding: 3px 8px; border-radius: 5px;
+  letter-spacing: 0.03em; white-space: nowrap;
+  transition: background 0.1s;
+  cursor: default;
+}
+.wl-ticker:hover { background: rgba(29,109,229,0.18); }
+[data-theme="dark"] .wl-ticker { color: #93c5fd; background: rgba(147,197,253,0.1); border-color: rgba(147,197,253,0.2); }
+[data-theme="dark"] .wl-ticker:hover { background: rgba(147,197,253,0.18); }
+.chat-input-wrap { padding:8px 10px 10px; flex-shrink:0; border-top:1px solid var(--line); }
+.chat-input-box { background:var(--bg2); border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; gap:6px; padding:7px 10px; transition:border-color 0.15s; }
+.chat-input-box:focus-within { border-color:var(--accent); }
+.chat-input { flex:1; background:transparent; border:none; outline:none; font-family:var(--font); font-size:13px; color:var(--text1); }
+.chat-input::placeholder { color:var(--text3); }
+.send-btn { width:26px; height:26px; border-radius:5px; background:var(--accent); border:none; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; transition:background 0.1s; flex-shrink:0; }
+.send-btn:hover { background:var(--accent2); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar">
+    <div class="server-header">
+      <div class="server-logo"><img src="data:image/jpeg;base64,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" alt="T3 Live"></div>
+      <div class="server-titles">
+        <div class="server-name">T3 Live</div>
+        <div class="server-sub">Momentum Express VTF®</div>
+      </div>
+    </div>
+
+    <div class="channels-scroll">
+      <!-- MY ROOMS -->
+      <div class="ch-group">
+        <div class="ch-group-header open" onclick="toggleGroup(this)">
+          <span class="ch-group-arrow">▶</span> My Rooms
+        </div>
+        <div class="ch-group-body">
+          <div class="ch-item active" onclick="setActive(this,'momentum-express')">
+            <span class="ch-icon">#</span>
+            <span class="ch-name">momentum-express</span>
+            <span class="ch-live-pill"><span class="ch-live-dot"></span>LIVE</span>
+          </div>
+          <div class="ch-item child" onclick="setActive(this,'market-chat')">
+            <span class="ch-icon">#</span><span class="ch-name">market-chat</span>
+            <span class="ch-badge">4</span>
+          </div>
+          <div class="ch-item child" onclick="setActive(this,'water-cooler')">
+            <span class="ch-icon">#</span><span class="ch-name">water-cooler</span>
+          </div>
+          <div class="ch-item child" onclick="setActive(this,'ready-room')">
+            <span class="ch-icon">#</span><span class="ch-name">ready-room</span>
+          </div>
+          <div class="ch-item child" onclick="setActive(this,'world-cup-26')">
+            <span class="ch-icon">🌍</span><span class="ch-name">world-cup-26</span>
+          </div>
+          <div class="ch-item child" onclick="setActive(this,'alerts')">
+            <span class="ch-icon">📌</span><span class="ch-name">alerts</span>
+          </div>
+          <div class="ch-item child" onclick="setActive(this,'resources')">
+            <span class="ch-icon">📁</span><span class="ch-name">resources</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MORE FROM T3 — other VTFs -->
+      <div class="ch-group">
+        <div class="ch-group-header open" onclick="toggleGroup(this)">
+          <span class="ch-group-arrow">▶</span> Other Trading Floors
+        </div>
+        <div class="ch-group-body">
+          <div class="ch-item locked" onclick="showUpgrade('Sultans of Swing VTF®')">
+            <svg class="lock-icon" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="ch-name">sultans-of-swing-vtf</span><span class="upgrade-pill">Upgrade</span>
+          </div>
+          <div class="ch-item locked" onclick="showUpgrade('Alpha Team VTF®')">
+            <svg class="lock-icon" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="ch-name">alpha-team-vtf</span><span class="upgrade-pill">Upgrade</span>
+          </div>
+          <div class="ch-item locked" onclick="showUpgrade('Inner Circle VTF®')">
+            <svg class="lock-icon" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="ch-name">inner-circle-vtf</span><span class="upgrade-pill">Upgrade</span>
+          </div>
+          <div class="ch-item locked" onclick="showUpgrade('Pro Desk VTF®')">
+            <svg class="lock-icon" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="ch-name">pro-desk-vtf</span><span class="upgrade-pill">Upgrade</span>
+          </div>
+          <div class="ch-item locked" onclick="showUpgrade('Strategic Day Trader VTF®')">
+            <svg class="lock-icon" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="ch-name">strategic-day-trader-vtf</span><span class="upgrade-pill">Upgrade</span>
+          </div>
+        </div>
+      </div>
+      <!-- DIRECT MESSAGES -->
+      <div class="ch-group">
+        <div class="ch-group-header open" onclick="toggleGroup(this)">
+          <span class="ch-group-arrow">▶</span> Direct Messages
+        </div>
+        <div class="ch-group-body">
+          <div class="dm-item" onclick="setActiveDM(this)">
+            <div class="dm-avatar-wrap">
+              <div class="dm-avatar">
+                <!-- Amber avatar — warm coral/professional -->
+                <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                  <circle cx="14" cy="14" r="14" fill="#e07b54"/>
+                  <ellipse cx="14" cy="30" rx="10" ry="6" fill="#c4622e"/>
+                  <ellipse cx="14" cy="17" rx="7" ry="8" fill="#f0a882"/>
+                  <ellipse cx="14" cy="11" rx="6" ry="7" fill="#f5c4a8"/>
+                  <!-- hair -->
+                  <ellipse cx="14" cy="7" rx="7" ry="5" fill="#8b4513"/>
+                  <ellipse cx="7" cy="11" rx="3" ry="5" fill="#8b4513"/>
+                  <ellipse cx="21" cy="11" rx="3" ry="5" fill="#8b4513"/>
+                  <!-- eyes -->
+                  <ellipse cx="11" cy="13" rx="1.8" ry="1.8" fill="#4a2c0a"/>
+                  <ellipse cx="17" cy="13" rx="1.8" ry="1.8" fill="#4a2c0a"/>
+                  <circle cx="11.5" cy="12.5" r="0.6" fill="#fff"/>
+                  <circle cx="17.5" cy="12.5" r="0.6" fill="#fff"/>
+                  <!-- smile -->
+                  <path d="M11 17 Q14 19.5 17 17" stroke="#c4622e" stroke-width="1" fill="none" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="dm-status"></div>
+            </div>
+            <div class="dm-info">
+              <div class="dm-name">
+                Amber
+                <span class="dm-tag">T3 Live</span>
+              </div>
+              <div class="dm-preview">Happy to help with any questions!</div>
+            </div>
+            <span class="ch-badge">1</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- USER BAR -->
+    <div class="user-bar">
+
+      <!-- Open House Banner — fully hardcoded, immune to theme -->
+      <a class="open-house-banner" href="https://secure.t3live.com/jr-romero-multiple-offers/" target="_blank">
+        <div class="oh-eyebrow">🔥 Open House — Limited Time</div>
+        <div class="oh-headline">Save up to <em>$5,788</em> — Act Now</div>
+        <div class="oh-timer">
+          <div class="oh-unit"><span class="oh-num" id="oh-days">00</span><span class="oh-lbl">Days</span></div>
+          <span class="oh-sep">:</span>
+          <div class="oh-unit"><span class="oh-num" id="oh-hrs">06</span><span class="oh-lbl">Hrs</span></div>
+          <span class="oh-sep">:</span>
+          <div class="oh-unit"><span class="oh-num" id="oh-min">00</span><span class="oh-lbl">Min</span></div>
+          <span class="oh-sep">:</span>
+          <div class="oh-unit"><span class="oh-num" id="oh-sec">00</span><span class="oh-lbl">Sec</span></div>
+        </div>
+        <div class="oh-cta">Become a Member →</div>
+      </a>
+
+      <!-- Contact -->
+      <div class="contact-banner">
+        <span style="font-size:13px;flex-shrink:0;margin-top:1px;">💬</span>
+        <div class="contact-banner-text">
+          <strong>Questions?</strong> Reach Amber at
+          <a href="mailto:amber@t3live.com">amber@t3live.com</a> ·
+          <a href="tel:6462147247">646-214-7247</a> ·
+          <a href="https://direct.lc.chat/13090053/1" target="_blank">Live Chat</a>
+        </div>
+      </div>
+
+      <!-- Identity -->
+      <div class="user-identity">
+        <!-- Shrek SVG avatar -->
+        <div class="user-avatar">
+          <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <!-- bg -->
+            <circle cx="16" cy="16" r="16" fill="#7ab648"/>
+            <!-- ears -->
+            <ellipse cx="5" cy="14" rx="3.5" ry="4.5" fill="#6da63f"/>
+            <ellipse cx="27" cy="14" rx="3.5" ry="4.5" fill="#6da63f"/>
+            <!-- neck / body shadow -->
+            <ellipse cx="16" cy="30" rx="9" ry="5" fill="#5e9435"/>
+            <!-- face -->
+            <ellipse cx="16" cy="16" rx="10" ry="11" fill="#8dc455"/>
+            <!-- ear detailing -->
+            <ellipse cx="5" cy="14" rx="2" ry="3" fill="#a8d96e" opacity="0.5"/>
+            <ellipse cx="27" cy="14" rx="2" ry="3" fill="#a8d96e" opacity="0.5"/>
+            <!-- brow ridge -->
+            <ellipse cx="16" cy="12" rx="7" ry="2.5" fill="#6da63f"/>
+            <!-- eyes -->
+            <ellipse cx="12" cy="14" rx="2.8" ry="2.5" fill="#fff"/>
+            <ellipse cx="20" cy="14" rx="2.8" ry="2.5" fill="#fff"/>
+            <circle cx="12.6" cy="14.4" r="1.5" fill="#5a3b10"/>
+            <circle cx="20.6" cy="14.4" r="1.5" fill="#5a3b10"/>
+            <circle cx="13" cy="14" r="0.5" fill="#fff"/>
+            <circle cx="21" cy="14" r="0.5" fill="#fff"/>
+            <!-- nose -->
+            <ellipse cx="16" cy="18" rx="3" ry="2" fill="#6da63f"/>
+            <circle cx="14.5" cy="18.3" r="0.9" fill="#5a8f30"/>
+            <circle cx="17.5" cy="18.3" r="0.9" fill="#5a8f30"/>
+            <!-- mouth / smile -->
+            <path d="M12 21.5 Q16 24.5 20 21.5" stroke="#4a7a28" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <div class="user-status-dot"></div>
+        </div>
+        <div class="user-names">
+          <div class="user-display">JR Member</div>
+          <div class="user-handle">#momentum-express</div>
+        </div>
+        <div style="display:flex;gap:2px;">
+          <button class="icon-btn" title="Mute mic">🎤</button>
+          <button class="icon-btn" title="Audio output">🔊</button>
+          <button class="icon-btn" title="Settings">⚙️</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-hash">#</span>
+      <span class="topbar-name" id="topbar-name">momentum-express</span>
+      <div class="topbar-divider"></div>
+      <span class="topbar-desc">Live trading with JR Romero — news-driven options &amp; swing ideas</span>
+      <div class="topbar-live"><div class="live-dot"></div>LIVE</div>
+      <button class="refresh-btn" onclick="triggerRefresh(this)" title="Refresh audio connection">
+        <span class="refresh-spin">↻</span> Audio issues? Refresh
+      </button>
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark mode">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        <span class="toggle-label" id="toggleLabel">Light</span>
+      </button>
+    </div>
+
+    <div class="content">
+
+      <!-- VIDEO PANE -->
+      <div class="video-pane">
+        <div class="video-stage">
+          <!-- White TradingView background — hardcoded, same in both modes -->
+          <div style="position:absolute;inset:0;background:#ffffff;background-image:linear-gradient(rgba(0,0,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.04) 1px,transparent 1px);background-size:48px 36px;"></div>
+          <svg class="chart-svg" viewBox="0 0 800 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- area fill -->
+            <polygon points="0,300 60,280 120,295 180,250 240,230 300,240 360,200 400,185 440,170 480,175 520,155 560,140 600,148 640,125 700,110 760,95 800,80 800,400 0,400" fill="rgba(33,150,243,0.08)"/>
+            <!-- price line -->
+            <polyline points="0,300 60,280 120,295 180,250 240,230 300,240 360,200 400,185 440,170 480,175 520,155 560,140 600,148 640,125 700,110 760,95 800,80" fill="none" stroke="#2563eb" stroke-width="2" opacity="0.9"/>
+            <!-- volume bars -->
+            <rect x="10" y="360" width="18" height="15" fill="rgba(22,163,74,0.35)"/>
+            <rect x="70" y="355" width="18" height="20" fill="rgba(220,38,38,0.35)"/>
+            <rect x="130" y="362" width="18" height="13" fill="rgba(22,163,74,0.35)"/>
+            <rect x="190" y="350" width="18" height="25" fill="rgba(22,163,74,0.35)"/>
+            <rect x="250" y="357" width="18" height="18" fill="rgba(220,38,38,0.35)"/>
+            <rect x="310" y="354" width="18" height="21" fill="rgba(22,163,74,0.35)"/>
+            <rect x="370" y="348" width="18" height="27" fill="rgba(22,163,74,0.35)"/>
+            <rect x="430" y="352" width="18" height="23" fill="rgba(22,163,74,0.35)"/>
+            <rect x="490" y="345" width="18" height="30" fill="rgba(22,163,74,0.35)"/>
+            <rect x="550" y="358" width="18" height="17" fill="rgba(220,38,38,0.35)"/>
+            <rect x="610" y="350" width="18" height="25" fill="rgba(22,163,74,0.35)"/>
+            <rect x="670" y="344" width="18" height="31" fill="rgba(22,163,74,0.35)"/>
+            <rect x="730" y="340" width="18" height="35" fill="rgba(22,163,74,0.35)"/>
+            <!-- grid lines -->
+            <line x1="0" y1="80" x2="800" y2="80" stroke="rgba(0,0,0,0.07)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="0" y1="170" x2="800" y2="170" stroke="rgba(0,0,0,0.07)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="0" y1="250" x2="800" y2="250" stroke="rgba(0,0,0,0.07)" stroke-width="1" stroke-dasharray="4,4"/>
+            <!-- price labels -->
+            <text x="775" y="85" fill="rgba(0,0,0,0.35)" font-size="10" font-family="monospace" text-anchor="end">596.42</text>
+            <text x="775" y="175" fill="rgba(0,0,0,0.35)" font-size="10" font-family="monospace" text-anchor="end">589.10</text>
+            <text x="775" y="255" fill="rgba(0,0,0,0.35)" font-size="10" font-family="monospace" text-anchor="end">582.30</text>
+            <!-- ticker label -->
+            <text x="20" y="30" fill="rgba(0,0,0,0.7)" font-size="14" font-family="monospace" font-weight="bold">SPY  D  1</text>
+            <text x="120" y="30" fill="#16a34a" font-size="14" font-family="monospace">▲ 596.42  +1.84 (+0.31%)</text>
+          </svg>
+
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:rgba(0,0,0,0.18);pointer-events:none;z-index:5;">
+            <div style="font-size:28px;margin-bottom:6px;">📺</div>
+            <div style="font-size:12px;line-height:1.5;">Trader screenshot goes here</div>
+          </div>
+
+          <!-- Trader cam with Shrek SVG -->
+          <div class="trader-cam">
+            <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" width="90" height="90">
+              <!-- dark bg -->
+              <rect width="90" height="90" fill="#1a2510"/>
+              <!-- body/shoulders -->
+              <ellipse cx="45" cy="88" rx="32" ry="18" fill="#4a7a28"/>
+              <!-- collar / shirt hint -->
+              <ellipse cx="45" cy="82" rx="20" ry="10" fill="#3d6a22"/>
+              <!-- neck -->
+              <rect x="35" y="65" width="20" height="18" rx="4" fill="#7ab648"/>
+              <!-- head -->
+              <ellipse cx="45" cy="46" rx="26" ry="28" fill="#8dc455"/>
+              <!-- ears with lumps -->
+              <ellipse cx="13" cy="40" rx="9" ry="12" fill="#7ab648"/>
+              <ellipse cx="77" cy="40" rx="9" ry="12" fill="#7ab648"/>
+              <ellipse cx="13" cy="40" rx="5" ry="7" fill="#a8d96e" opacity="0.45"/>
+              <ellipse cx="77" cy="40" rx="5" ry="7" fill="#a8d96e" opacity="0.45"/>
+              <!-- brow ridge shadow -->
+              <ellipse cx="45" cy="31" rx="18" ry="5" fill="#6da63f"/>
+              <!-- eyebrows — furrowed -->
+              <path d="M30 31 Q37 27 41 30" stroke="#4a7a28" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M49 30 Q53 27 60 31" stroke="#4a7a28" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <!-- eyes -->
+              <ellipse cx="36" cy="38" rx="7" ry="6.5" fill="#fff"/>
+              <ellipse cx="54" cy="38" rx="7" ry="6.5" fill="#fff"/>
+              <circle cx="37.5" cy="39" r="4" fill="#5a3b10"/>
+              <circle cx="55.5" cy="39" r="4" fill="#5a3b10"/>
+              <circle cx="37.5" cy="39" r="2" fill="#1a0a00"/>
+              <circle cx="55.5" cy="39" r="2" fill="#1a0a00"/>
+              <circle cx="38.5" cy="37.5" r="1.2" fill="#fff"/>
+              <circle cx="56.5" cy="37.5" r="1.2" fill="#fff"/>
+              <!-- big nose -->
+              <ellipse cx="45" cy="50" rx="8" ry="6" fill="#7ab648"/>
+              <ellipse cx="45" cy="52" rx="7" ry="4.5" fill="#6da63f"/>
+              <circle cx="41" cy="52" r="2.5" fill="#5a8f30"/>
+              <circle cx="49" cy="52" r="2.5" fill="#5a8f30"/>
+              <!-- wide grin -->
+              <path d="M33 60 Q45 68 57 60" stroke="#4a7a28" stroke-width="2" fill="#5a3b10" stroke-linecap="round"/>
+              <path d="M36 61 Q45 66 54 61" fill="#c97a4a"/>
+              <!-- teeth -->
+              <rect x="40" y="61" width="5" height="4" rx="1" fill="#f0ede0"/>
+              <rect x="46" y="61" width="5" height="4" rx="1" fill="#f0ede0"/>
+              <!-- name label -->
+              <rect x="0" y="76" width="90" height="14" fill="rgba(0,0,0,0.55)"/>
+              <text x="45" y="86" text-anchor="middle" font-size="9" font-family="Inter,sans-serif" font-weight="600" fill="#fff">JR Romero</text>
+            </svg>
+            <div class="trader-speaking-ring"></div>
+          </div>
+
+          <!-- Presenter badge -->
+          <div class="presenter-badge">
+            <div class="presenter-name">JR Romero</div>
+            <div class="presenter-role">Director of Education · T3 Live</div>
+          </div>
+
+          <div class="speaking-ring">
+            <div class="live-dot" style="background:#22c55e;"></div>
+            JR is speaking
+          </div>
+        </div>
+
+        <div class="alerts-strip">
+          <span class="alerts-label">Alerts</span>
+          <div class="alerts-ticker">
+            <span>
+              <span class="alert-item"><b>Monica</b> &nbsp;JR LIVE HERE AT 12 PM ET — youtube.com/live/1NCZZtmBySE &nbsp;·&nbsp; 11:25 AM</span>
+              <span class="alert-item"><b>Monica</b> &nbsp;Weekly Watchlist Sunday 7 PM ET — link in resources &nbsp;·&nbsp; 6/25</span>
+              <span class="alert-item"><b>Monica</b> &nbsp;Open House deals expire tonight 11:59 PM ET — save up to $5,788 &nbsp;·&nbsp; 3:42 PM</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHAT PANE -->
+      <div class="chat-pane">
+        <div class="chat-pane-header">
+          <span class="chat-pane-title" id="chat-title"># momentum-express</span>
+          <span class="member-count"><span class="member-dot"></span>247 online</span>
+        </div>
+        <div class="chat-pinned-area">
+          <div class="pinned-wrap">
+            <div class="pinned-bar">
+              <span class="pin-icon">📌</span> Pinned Message
+            </div>
+            <div class="pinned-body">
+              <div class="pinned-meta">
+                <div class="pinned-avatar">JR</div>
+                <span class="pinned-author">JR Romero<span class="pinned-author-tag">HOST</span></span>
+                <span class="pinned-time">Today 9:00 AM</span>
+              </div>
+              <div class="pinned-label">📋 Daily Watchlist — June 27</div>
+              <div class="watchlist-tickers">
+                <span class="wl-ticker">NUAI</span>
+                <span class="wl-ticker">PENG</span>
+                <span class="wl-ticker">CLOV</span>
+                <span class="wl-ticker">LQDA</span>
+                <span class="wl-ticker">QNT</span>
+                <span class="wl-ticker">PTRN</span>
+                <span class="wl-ticker">MU</span>
+                <span class="wl-ticker">SNDK</span>
+                <span class="wl-ticker">WDC</span>
+                <span class="wl-ticker">GLW</span>
+                <span class="wl-ticker">INTC</span>
+                <span class="wl-ticker">AMD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="messages" id="messages">
+          <div class="date-divider"><span>Today — June 27</span></div>
+          <div class="msg"><div class="msg-avatar mod">M</div><div class="msg-body"><div class="msg-meta"><span class="msg-author mod-tag">Monica</span><span class="msg-time">11:25 AM</span></div><div class="msg-text">JR is going LIVE at 12 PM ET today. Don't miss it 🔥</div></div></div>
+          <div class="msg"><div class="msg-avatar user1">L</div><div class="msg-body"><div class="msg-meta"><span class="msg-author crown-badge">Linda R<span class="pro-tag">PRO TRADER</span></span><span class="msg-time">5:16 PM</span></div><div class="msg-text"><span class="mention">@Eddy</span> Thanks for your help this week! Really appreciate it 🙏</div></div></div>
+          <div class="msg"><div class="msg-avatar user2">R</div><div class="msg-body"><div class="msg-meta"><span class="msg-author">Richard</span><span class="msg-time">5:27 PM</span></div><div class="msg-text">Weekly Reversal Scan 6/27: <span class="ticker">$BAND</span> <span class="ticker">$FROG</span> <span class="ticker">$KALU</span> all &gt;90 SCTR · <span class="ticker">$XOMA</span> <span class="ticker">$KELYA</span> <span class="ticker">$CMP</span> all w/&gt;80 SCTR 🐕</div></div></div>
+          <div class="msg"><div class="msg-avatar user3">S</div><div class="msg-body"><div class="msg-meta"><span class="msg-author">scot</span><span class="msg-time">8:42 PM</span></div><div class="msg-text"><span class="mention">@Richard</span> heading up for a 2-3 month AK driving tour — any recs? anatta.scott@gmail.com</div></div></div>
+          <div class="msg"><div class="msg-avatar user4">E</div><div class="msg-body"><div class="msg-meta"><span class="msg-author mod-tag">Eddy</span><span class="msg-time">9:01 PM</span></div><div class="msg-text">Great session. <span class="ticker">$SPY</span> holding above VWAP — watching for continuation Monday 📈</div></div></div>
+          <div class="msg cont"><div class="msg-avatar user4">E</div><div class="msg-body"><div class="msg-text">Ralph's TView scripts updated in resources if you haven't grabbed them</div></div></div>
+          <div class="msg"><div class="msg-avatar mod">M</div><div class="msg-body"><div class="msg-meta"><span class="msg-author mod-tag">Monica</span><span class="msg-time">9:15 PM</span></div><div class="msg-text">Open House deals end tonight! Best savings of the year 👆 See pinned for details.</div></div></div>
+        </div>
+        <div class="chat-input-wrap">
+          <div class="chat-input-box">
+            <input class="chat-input" type="text" placeholder="Message #momentum-express" id="chatInput" onkeydown="handleEnter(event)">
+            <button class="send-btn" onclick="sendMsg()">➤</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div id="upgrade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--bg1);border:1px solid var(--line);border-radius:14px;padding:1.75rem;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="font-size:28px;margin-bottom:8px;">🔒</div>
+    <h2 style="font-size:17px;font-weight:600;color:var(--text1);margin-bottom:6px;" id="modal-room-name">Alpha Team</h2>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1.25rem;line-height:1.5;">This Virtual Trading Floor® is part of a higher-tier T3 Live subscription. Upgrade your plan to unlock access.</p>
+    <a href="https://secure.t3live.com/jr-romero-multiple-offers/" target="_blank" style="display:block;background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:10px;border-radius:8px;text-decoration:none;margin-bottom:8px;">View Upgrade Options →</a>
+    <button onclick="closeModal()" style="background:transparent;border:1px solid var(--line);color:var(--text2);font-size:13px;padding:8px 20px;border-radius:8px;cursor:pointer;width:100%;font-family:var(--font);">Not now</button>
+  </div>
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('toggleLabel').textContent = isDark ? 'Light' : 'Dark';
+}
+function triggerRefresh(btn) {
+  const spin = btn.querySelector('.refresh-spin');
+  spin.style.animation = 'none';
+  spin.offsetHeight; // reflow
+  spin.style.animation = 'spin-once 0.4s linear';
+  setTimeout(() => location.reload(), 400);
+}
+function toggleGroup(el) {
+  el.classList.toggle('open');
+  el.nextElementSibling.classList.toggle('collapsed');
+}
+function setActiveDM(el) {
+  document.querySelectorAll('.ch-item.active').forEach(function(e){ e.classList.remove('active'); });
+  el.classList.add('active');
+  const badge = el.querySelector('.ch-badge');
+  if (badge) badge.remove();
+  document.getElementById('topbar-name').textContent = 'Amber';
+  document.getElementById('chat-title').textContent = '@ Amber';
+  document.getElementById('chatInput').placeholder = 'Message Amber';
+}
+function setActive(el, name) {
+  document.querySelectorAll('.ch-item.active').forEach(function(e){ e.classList.remove('active'); });
+  el.classList.add('active');
+  const badge = el.querySelector('.ch-badge');
+  if (badge) badge.remove();
+  document.getElementById('topbar-name').textContent = name;
+  document.getElementById('chat-title').textContent = '# ' + name;
+  document.getElementById('chatInput').placeholder = 'Message #' + name;
+}
+function showUpgrade(name) {
+  document.getElementById('modal-room-name').textContent = name;
+  document.getElementById('upgrade-modal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('upgrade-modal').style.display = 'none'; }
+document.getElementById('upgrade-modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+function handleEnter(e) { if (e.key === 'Enter') sendMsg(); }
+function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim(); if (!text) return;
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div'); div.className = 'msg';
+  div.innerHTML = '<div class="msg-avatar" style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);width:32px;height:32px;border-radius:50%;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">Y</div><div class="msg-body"><div class="msg-meta"><span class="msg-author">You</span><span class="msg-time">'+ new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) +'</span></div><div class="msg-text">'+ text.replace(/</g,'&lt;').replace(/@(\w+)/g,'<span class="mention">@$1</span>').replace(/\$([A-Z]+)/g,'<span class="ticker">$$$1</span>') +'</div></div>';
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight; input.value = '';
+}
+// Countdown to tonight 11:59 PM ET
+function updateCountdown() {
+  const now = new Date();
+  const etNow = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+  const deadline = new Date(etNow); deadline.setHours(23,59,59,0);
+  let rem = Math.max(0, deadline - etNow);
+  const d = Math.floor(rem/86400000); rem %= 86400000;
+  const h = Math.floor(rem/3600000);  rem %= 3600000;
+  const m = Math.floor(rem/60000);    rem %= 60000;
+  const s = Math.floor(rem/1000);
+  document.getElementById('oh-days').textContent = String(d).padStart(2,'0');
+  document.getElementById('oh-hrs').textContent  = String(h).padStart(2,'0');
+  document.getElementById('oh-min').textContent  = String(m).padStart(2,'0');
+  document.getElementById('oh-sec').textContent  = String(s).padStart(2,'0');
+}
+updateCountdown(); setInterval(updateCountdown, 1000);
+</script>
+</body>
+</html>
