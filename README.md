@@ -2,7 +2,7 @@
 
 Working HTML prototypes and structured product feedback prepared after participating in the Momentum Express Virtual Trading Floor® open house (June 2026).
 
-## Pages
+## Pages  
 
 | File | Description |
 |------|-------------|
